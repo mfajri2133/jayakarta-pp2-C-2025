@@ -1,4 +1,4 @@
-/*
+package config;/*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
  */
@@ -13,12 +13,12 @@ import javax.swing.JOptionPane;
  *
  * @author spag9
  */
-public class KoneksiDB {
+public class DBConnection {
     public static Connection mysqlconfig;
     
-    public static Connection configDB() throws SQLException{
+    public static Connection getConnection() throws SQLException{
         try {
-            String url = "jdbc:mysql://localhost:3306/kampus_db";
+            String url = "jdbc:mysql://localhost:3306/toko_jayakarta";
             String user = "root";
             String pass = "123123123";
             
