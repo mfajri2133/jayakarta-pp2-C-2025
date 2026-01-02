@@ -7,7 +7,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class PositionView extends JFrame {
-    // Komponen sesuai standar Swing JFC
     private JTextField txtName, txtSearch;
     private JTable table;
     private DefaultTableModel tableModel;
@@ -24,7 +23,7 @@ public class PositionView extends JFrame {
         setLocationRelativeTo(null);
         setLayout(null);
 
-        // --- Label & Input (Fitur Input) ---
+        // Label & Input (Fitur Input)
         JLabel lblTitle = new JLabel("POSITION DATA MANAGEMENT");
         lblTitle.setBounds(150, 10, 200, 25);
         add(lblTitle);
@@ -37,26 +36,26 @@ public class PositionView extends JFrame {
         txtName.setBounds(20, 75, 440, 30);
         add(txtName);
 
-        // --- Buttons (Fitur Create, Update, Delete) ---
+        // Button (Fitur Create, Update, Delete)
         btnSave = new JButton("Save");
         btnSave.setBounds(20, 115, 100, 30);
         add(btnSave);
 
         btnUpdate = new JButton("Update");
         btnUpdate.setBounds(130, 115, 100, 30);
-        btnUpdate.setEnabled(false); // Validasi: Hanya aktif jika data dipilih
+        btnUpdate.setEnabled(false); //Hanya bisa aktif jika data dipilih
         add(btnUpdate);
 
         btnDelete = new JButton("Delete");
         btnDelete.setBounds(240, 115, 100, 30);
-        btnDelete.setEnabled(false); // Validasi: Hanya aktif jika data dipilih
+        btnDelete.setEnabled(false); //Hanya bisa aktif jika data dipilih
         add(btnDelete);
 
         btnClear = new JButton("Clear");
         btnClear.setBounds(350, 115, 100, 30);
         add(btnClear);
 
-        // --- Search Section ---
+        // Search Section 
         JLabel lblSearch = new JLabel("Search:");
         lblSearch.setBounds(20, 165, 60, 25);
         add(lblSearch);
@@ -65,11 +64,11 @@ public class PositionView extends JFrame {
         txtSearch.setBounds(80, 165, 380, 30);
         add(txtSearch);
 
-        // --- JTable (Fitur Melihat Data) ---
+        // Table (Fitur Melihat Data) 
         tableModel = new DefaultTableModel(new String[]{"No", "ID", "Position Name"}, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return false; // Tabel read-only sesuai ketentuan
+                return false; 
             }
         };
         
@@ -78,12 +77,12 @@ public class PositionView extends JFrame {
         scrollPane.setBounds(20, 210, 440, 270);
         add(scrollPane);
 
-        // --- LOGIKA & VALIDASI ---
+        // LOGIKA & VALIDASI 
 
-        // Load Data Awal (Poin 7: Melihat data di JTable)
+        // Load Data Awal (Melihat data di JTable)
         controller.loadData(tableModel);
 
-        // Event: Klik Baris Tabel (Poin 5 & 6: Persiapan Ubah/Hapus)
+        // Klik Baris Tabel (Persiapan Ubah/Hapus)
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -99,10 +98,10 @@ public class PositionView extends JFrame {
             }
         });
 
-        // Event: Save (Poin 4 & 8: Tambah Data & Validasi)
+        // Event: Save (Tambah Data & Validasi)
         btnSave.addActionListener(e -> {
             String name = txtName.getText().trim();
-            if (name.isEmpty()) { // Validasi Input (Poin 8)
+            if (name.isEmpty()) { 
                 JOptionPane.showMessageDialog(this, "Validasi: Nama posisi tidak boleh kosong!");
             } else {
                 controller.insert(name, tableModel);
@@ -110,10 +109,10 @@ public class PositionView extends JFrame {
             }
         });
 
-        // Event: Update (Poin 5)
+        // Event: Update 
         btnUpdate.addActionListener(e -> {
             String name = txtName.getText().trim();
-            if (name.isEmpty()) { // Validasi Input (Poin 8)
+            if (name.isEmpty()) { 
                 JOptionPane.showMessageDialog(this, "Validasi: Nama posisi baru harus diisi!");
             } else {
                 controller.update(selectedId, name, tableModel);
@@ -121,7 +120,7 @@ public class PositionView extends JFrame {
             }
         });
 
-        // Event: Delete (Poin 6)
+        // Event: Delete 
         btnDelete.addActionListener(e -> {
             int confirm = JOptionPane.showConfirmDialog(this, "Hapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
             if (confirm == JOptionPane.YES_OPTION) {
@@ -130,7 +129,7 @@ public class PositionView extends JFrame {
             }
         });
 
-        // Event: Search (Melihat data secara spesifik)
+        // Event: Search (Mencari data)
         txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent evt) {
