@@ -1,6 +1,6 @@
 package view;
 
-import controller.CategoryController;
+import controller.EmployeeController;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -8,34 +8,45 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
-public class CategoryView extends JFrame {
+public class EmployeeView extends JFrame {
 
-    private JTextField txtName, txtSearch;
+    private JTextField txtName, txtEmail, txtSearch;
+    private JComboBox<String> cbPosition;
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnSave, btnUpdate, btnDelete, btnClear;
 
-    private CategoryController controller = new CategoryController();
+    private EmployeeController controller = new EmployeeController();
     private int selectedId = -1;
 
-    public CategoryView() {
-        setTitle("TOKO JAYAKARTA - KATEGORI");
-        setSize(600, 550);
+    public EmployeeView() {
+        setTitle("TOKO JAYAKARTA - PEGAWAI");
+        setSize(800, 600);
         setLocationRelativeTo(null);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
 
-        //  FORM PANEL 
-        JPanel formPanel = new JPanel(new GridLayout(1, 2, 10, 10));
-        formPanel.setBorder(BorderFactory.createTitledBorder("Form Kategori"));
+        //  FORM PANEL
+        JPanel formPanel = new JPanel(new GridLayout(2, 4, 10, 10));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Form Pegawai"));
 
-        formPanel.add(new JLabel("Nama Kategori"));
+        formPanel.add(new JLabel("Nama"));
         txtName = new JTextField();
         formPanel.add(txtName);
 
-        add(formPanel, BorderLayout.NORTH);
+        formPanel.add(new JLabel("Jabatan"));
+        cbPosition = new JComboBox<>();
+        formPanel.add(cbPosition);
 
-        //  BUTTON PANEL 
+        formPanel.add(new JLabel("Email"));
+        txtEmail = new JTextField();
+        formPanel.add(txtEmail);
+
+        // filler supaya grid rapi
+        formPanel.add(new JLabel(""));
+        formPanel.add(new JLabel(""));
+
+        //  BUTTON PANEL
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
         btnSave = new JButton("Simpan");
@@ -59,7 +70,7 @@ public class CategoryView extends JFrame {
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnClear);
 
-        //  SEARCH PANEL 
+        //  SEARCH PANEL
         JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
         searchPanel.setBorder(BorderFactory.createTitledBorder("Pencarian"));
         searchPanel.add(new JLabel("Cari:"), BorderLayout.WEST);
@@ -74,9 +85,9 @@ public class CategoryView extends JFrame {
 
         add(topPanel, BorderLayout.NORTH);
 
-        //  TABLE 
+        //  TABLE
         tableModel = new DefaultTableModel(
-                new String[]{"No", "ID", "Nama Kategori"}, 0
+                new String[]{"No", "ID", "Nama", "Jabatan", "Email"}, 0
         ) {
             public boolean isCellEditable(int r, int c) {
                 return false;
@@ -90,15 +101,16 @@ public class CategoryView extends JFrame {
 
         JScrollPane scrollPane = new JScrollPane(table);
         scrollPane.setBorder(
-                BorderFactory.createTitledBorder("Daftar Kategori")
+                BorderFactory.createTitledBorder("Daftar Pegawai")
         );
 
         add(scrollPane, BorderLayout.CENTER);
 
-        //  LOAD DATA 
+        //  LOAD DATA
+        controller.loadPositions(cbPosition);
         controller.loadData(tableModel);
 
-        //  EVENTS 
+        //  EVENTS
         table.addMouseListener(new MouseAdapter() {
             public void mouseClicked(MouseEvent e) {
                 int row = table.getSelectedRow();
@@ -107,9 +119,10 @@ public class CategoryView extends JFrame {
                 selectedId = Integer.parseInt(
                         tableModel.getValueAt(row, 1).toString()
                 );
-                txtName.setText(
-                        tableModel.getValueAt(row, 2).toString()
-                );
+
+                txtName.setText(tableModel.getValueAt(row, 2).toString());
+                cbPosition.setSelectedItem(tableModel.getValueAt(row, 3).toString());
+                txtEmail.setText(tableModel.getValueAt(row, 4).toString());
 
                 btnSave.setEnabled(false);
                 btnUpdate.setEnabled(true);
@@ -118,45 +131,29 @@ public class CategoryView extends JFrame {
         });
 
         btnSave.addActionListener(e -> {
-            String name = txtName.getText().trim();
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Nama kategori tidak boleh kosong!"
-                );
-                return;
-            }
-
-            controller.insert(name, tableModel);
+            controller.insert(
+                    txtName.getText(),
+                    cbPosition.getSelectedItem().toString(),
+                    txtEmail.getText(),
+                    tableModel
+            );
             resetForm();
         });
 
         btnUpdate.addActionListener(e -> {
-            String name = txtName.getText().trim();
-            if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(
-                        this,
-                        "Nama kategori baru harus diisi!"
-                );
-                return;
-            }
-
-            controller.update(selectedId, name, tableModel);
+            controller.update(
+                    selectedId,
+                    txtName.getText(),
+                    cbPosition.getSelectedItem().toString(),
+                    txtEmail.getText(),
+                    tableModel
+            );
             resetForm();
         });
 
         btnDelete.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(
-                    this,
-                    "Hapus data ini?",
-                    "Konfirmasi",
-                    JOptionPane.YES_NO_OPTION
-            );
-
-            if (confirm == JOptionPane.YES_OPTION) {
-                controller.delete(selectedId, tableModel);
-                resetForm();
-            }
+            controller.delete(selectedId, tableModel);
+            resetForm();
         });
 
         txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
@@ -170,6 +167,7 @@ public class CategoryView extends JFrame {
 
     private void resetForm() {
         txtName.setText("");
+        txtEmail.setText("");
         txtSearch.setText("");
         selectedId = -1;
 

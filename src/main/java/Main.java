@@ -1,7 +1,7 @@
-
+import view.MainMenu;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hellossss, World!");
+        new MainMenu().setVisible(true);
     }
 }
