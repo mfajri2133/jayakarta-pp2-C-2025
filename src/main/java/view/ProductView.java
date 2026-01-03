@@ -1,140 +1,207 @@
 package view;
 
+import controller.ProductController;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class ProductView extends JFrame {
 
-    // ===== Components =====
-    private JTable tableProducts;
-    private DefaultTableModel tableModel;
-
-    private JTextField txtId;
-    private JTextField txtName;
+    private JTextField txtName, txtPrice, txtStock, txtSearch;
     private JComboBox<String> cbCategory;
-    private JTextField txtPrice;
-    private JTextField txtStock;
+    private JTable table;
+    private DefaultTableModel tableModel;
+    private JButton btnSave, btnUpdate, btnDelete, btnClear;
 
-    private JButton btnAdd;
-    private JButton btnUpdate;
-    private JButton btnDelete;
-    private JButton btnClear;
+    private ProductController controller = new ProductController();
+    private int selectedId = -1;
 
     public ProductView() {
-        setTitle("Manajemen Produk - Toko Jayakarta");
-        setSize(800, 500);
+        setTitle("TOKO JAYAKARTA - PRODUK");
+        setSize(850, 600);
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        initComponents();
-    }
-
-    private void initComponents() {
-        // ===== Panel Utama =====
-        JPanel mainPanel = new JPanel(new BorderLayout(10, 10));
-        mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-
-        // ===== Form Panel =====
-        JPanel formPanel = new JPanel(new GridLayout(5, 2, 10, 10));
-
-        txtId = new JTextField();
-        txtId.setEditable(false);
-
-        txtName = new JTextField();
-        cbCategory = new JComboBox<>();
-        txtPrice = new JTextField();
-        txtStock = new JTextField();
-
-        formPanel.add(new JLabel("ID Produk"));
-        formPanel.add(txtId);
+        //  FORM PANEL 
+        JPanel formPanel = new JPanel(new GridLayout(2, 4, 10, 10));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Form Produk"));
 
         formPanel.add(new JLabel("Nama Produk"));
+        txtName = new JTextField();
         formPanel.add(txtName);
 
         formPanel.add(new JLabel("Kategori"));
+        cbCategory = new JComboBox<>();
         formPanel.add(cbCategory);
 
         formPanel.add(new JLabel("Harga"));
+        txtPrice = new JTextField();
         formPanel.add(txtPrice);
 
         formPanel.add(new JLabel("Stok"));
+        txtStock = new JTextField();
         formPanel.add(txtStock);
 
-        // ===== Button Panel =====
-        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        add(formPanel, BorderLayout.NORTH);
 
-        btnAdd = new JButton("Tambah");
+        //  BUTTON PANEL 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+
+        btnSave = new JButton("Simpan");
+        btnSave.setBackground(new Color(46, 204, 113)); // hijau
+        btnSave.setForeground(Color.WHITE);
+
         btnUpdate = new JButton("Ubah");
-        btnDelete = new JButton("Hapus");
-        btnClear = new JButton("Clear");
+        btnUpdate.setBackground(new Color(241, 196, 15)); // kuning
+        btnUpdate.setForeground(Color.BLACK);
+        btnUpdate.setEnabled(false);
 
-        buttonPanel.add(btnAdd);
+        btnDelete = new JButton("Hapus");
+        btnDelete.setBackground(new Color(231, 76, 60)); // merah
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setEnabled(false);
+
+        btnClear = new JButton("Clear");
+        btnClear.setBackground(new Color(189, 195, 199)); // abu
+        btnClear.setForeground(Color.BLACK);
+
+        buttonPanel.add(btnSave);
         buttonPanel.add(btnUpdate);
         buttonPanel.add(btnDelete);
         buttonPanel.add(btnClear);
 
-        JPanel topPanel = new JPanel(new BorderLayout());
-        topPanel.add(formPanel, BorderLayout.CENTER);
-        topPanel.add(buttonPanel, BorderLayout.SOUTH);
+        //  SEARCH PANEL 
+        JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Pencarian"));
 
-        // ===== Table =====
+        searchPanel.add(new JLabel("Cari:"), BorderLayout.WEST);
+        txtSearch = new JTextField();
+        searchPanel.add(txtSearch, BorderLayout.CENTER);
+
+        JPanel topPanel = new JPanel(new BorderLayout(10, 10));
+        topPanel.add(formPanel, BorderLayout.NORTH);
+        topPanel.add(buttonPanel, BorderLayout.CENTER);
+        topPanel.add(searchPanel, BorderLayout.SOUTH);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        //  TABLE 
         tableModel = new DefaultTableModel(
-                new Object[]{"ID", "Nama Produk", "Kategori", "Harga", "Stok"}, 0
+                new String[]{"No", "ID", "Produk", "Kategori", "Harga", "Stok"}, 0
+        ) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
+            }
+        };
+
+        table = new JTable(tableModel);
+        table.getColumnModel().getColumn(1).setMinWidth(0);
+        table.getColumnModel().getColumn(1).setMaxWidth(0);
+        table.getColumnModel().getColumn(1).setWidth(0);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        scrollPane.setBorder(
+                BorderFactory.createTitledBorder("Daftar Produk")
         );
 
-        tableProducts = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(tableProducts);
+        add(scrollPane, BorderLayout.CENTER);
 
-        // ===== Add to Main Panel =====
-        mainPanel.add(topPanel, BorderLayout.NORTH);
-        mainPanel.add(scrollPane, BorderLayout.CENTER);
+        //  LOAD DATA 
+        controller.loadCategories(cbCategory);
+        controller.loadData(tableModel);
 
-        add(mainPanel);
+        //  EVENTS 
+        table.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int row = table.getSelectedRow();
+                selectedId = Integer.parseInt(
+                        tableModel.getValueAt(row, 1).toString()
+                );
+
+                txtName.setText(tableModel.getValueAt(row, 2).toString());
+                cbCategory.setSelectedItem(
+                        tableModel.getValueAt(row, 3).toString()
+                );
+                txtPrice.setText(tableModel.getValueAt(row, 4).toString());
+                txtStock.setText(tableModel.getValueAt(row, 5).toString());
+
+                btnSave.setEnabled(false);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
+            }
+        });
+
+        btnSave.addActionListener(e -> {
+            controller.insert(
+                    txtName.getText(),
+                    cbCategory.getSelectedItem().toString(),
+                    txtPrice.getText(),
+                    txtStock.getText(),
+                    tableModel
+            );
+            resetForm();
+        });
+
+        btnUpdate.addActionListener(e -> {
+            controller.update(
+                    selectedId,
+                    txtName.getText(),
+                    cbCategory.getSelectedItem().toString(),
+                    txtPrice.getText(),
+                    txtStock.getText(),
+                    tableModel
+            );
+            resetForm();
+        });
+
+        btnDelete.addActionListener(e -> {
+            controller.delete(selectedId, tableModel);
+            resetForm();
+        });
+
+        txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
+            @Override
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                controller.search(txtSearch.getText(), tableModel);
+            }
+        });
+
+        btnClear.addActionListener(e -> resetForm());
     }
 
-    // ===== Getter (dipakai Controller) =====
-    public JTable getTableProducts() {
-        return tableProducts;
-    }
+    private void resetForm() {
+        txtName.setText("");
+        txtPrice.setText("");
+        txtStock.setText("");
+        txtSearch.setText("");
+        selectedId = -1;
 
-    public DefaultTableModel getTableModel() {
-        return tableModel;
-    }
+        btnSave.setEnabled(true);
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
 
-    public JTextField getTxtId() {
-        return txtId;
+        table.clearSelection();
+        controller.loadData(tableModel);
     }
+    
+    private void resetForm() {
+        txtName.setText("");
+        txtPrice.setText("");
+        txtStock.setText("");
+        txtSearch.setText("");
+        selectedId = -1;
 
-    public JTextField getTxtName() {
-        return txtName;
-    }
+        btnSave.setEnabled(true);
+        btnUpdate.setEnabled(false);
+        btnDelete.setEnabled(false);
 
-    public JComboBox<String> getCbCategory() {
-        return cbCategory;
+        table.clearSelection();
+        controller.loadData(tableModel);
     }
-
-    public JTextField getTxtPrice() {
-        return txtPrice;
-    }
-
-    public JTextField getTxtStock() {
-        return txtStock;
-    }
-
-    public JButton getBtnAdd() {
-        return btnAdd;
-    }
-
-    public JButton getBtnUpdate() {
-        return btnUpdate;
-    }
-
-    public JButton getBtnDelete() {
-        return btnDelete;
-    }
-
-    public JButton getBtnClear() {
-        return btnClear;
-    }
+}
 }
