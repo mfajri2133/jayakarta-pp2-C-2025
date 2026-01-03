@@ -1,135 +1,167 @@
 package view;
 
 import controller.PositionController;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 public class PositionView extends JFrame {
+
     private JTextField txtName, txtSearch;
     private JTable table;
     private DefaultTableModel tableModel;
     private JButton btnSave, btnUpdate, btnDelete, btnClear;
-    
+
     private PositionController controller = new PositionController();
-    private int selectedId = -1; 
+    private int selectedId = -1;
 
     public PositionView() {
-        // Setup Frame
-        setTitle("Management Position - Case Study");
-        setSize(500, 550);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setTitle("TOKO JAYAKARTA - JABATAN");
+        setSize(600, 550);
         setLocationRelativeTo(null);
-        setLayout(null);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLayout(new BorderLayout(10, 10));
 
-        // Label & Input (Fitur Input)
-        JLabel lblTitle = new JLabel("POSITION DATA MANAGEMENT");
-        lblTitle.setBounds(150, 10, 200, 25);
-        add(lblTitle);
+        //  FORM PANEL 
+        JPanel formPanel = new JPanel(new GridLayout(1, 2, 10, 10));
+        formPanel.setBorder(BorderFactory.createTitledBorder("Form Jabatan"));
 
-        JLabel lblName = new JLabel("Position Name:");
-        lblName.setBounds(20, 50, 100, 25);
-        add(lblName);
-
+        formPanel.add(new JLabel("Nama Jabatan"));
         txtName = new JTextField();
-        txtName.setBounds(20, 75, 440, 30);
-        add(txtName);
+        formPanel.add(txtName);
 
-        // Button (Fitur Create, Update, Delete)
-        btnSave = new JButton("Save");
-        btnSave.setBounds(20, 115, 100, 30);
-        add(btnSave);
+        add(formPanel, BorderLayout.NORTH);
 
-        btnUpdate = new JButton("Update");
-        btnUpdate.setBounds(130, 115, 100, 30);
-        btnUpdate.setEnabled(false); //Hanya bisa aktif jika data dipilih
-        add(btnUpdate);
+        //  BUTTON PANEL 
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
 
-        btnDelete = new JButton("Delete");
-        btnDelete.setBounds(240, 115, 100, 30);
-        btnDelete.setEnabled(false); //Hanya bisa aktif jika data dipilih
-        add(btnDelete);
+        btnSave = new JButton("Simpan");
+        btnSave.setBackground(new Color(46, 204, 113)); // hijau
+        btnSave.setForeground(Color.WHITE);
+
+        btnUpdate = new JButton("Ubah");
+        btnUpdate.setBackground(new Color(241, 196, 15)); // kuning
+        btnUpdate.setForeground(Color.BLACK);
+        btnUpdate.setEnabled(false);
+
+        btnDelete = new JButton("Hapus");
+        btnDelete.setBackground(new Color(231, 76, 60)); // merah
+        btnDelete.setForeground(Color.WHITE);
+        btnDelete.setEnabled(false);
 
         btnClear = new JButton("Clear");
-        btnClear.setBounds(350, 115, 100, 30);
-        add(btnClear);
+        btnClear.setBackground(new Color(189, 195, 199)); // abu
+        btnClear.setForeground(Color.BLACK);
 
-        // Search Section 
-        JLabel lblSearch = new JLabel("Search:");
-        lblSearch.setBounds(20, 165, 60, 25);
-        add(lblSearch);
+        buttonPanel.add(btnSave);
+        buttonPanel.add(btnUpdate);
+        buttonPanel.add(btnDelete);
+        buttonPanel.add(btnClear);
 
+        //  SEARCH PANEL 
+        JPanel searchPanel = new JPanel(new BorderLayout(5, 5));
+        searchPanel.setBorder(BorderFactory.createTitledBorder("Pencarian"));
+
+        searchPanel.add(new JLabel("Cari:"), BorderLayout.WEST);
         txtSearch = new JTextField();
-        txtSearch.setBounds(80, 165, 380, 30);
-        add(txtSearch);
+        searchPanel.add(txtSearch, BorderLayout.CENTER);
 
-        // Table (Fitur Melihat Data) 
-        tableModel = new DefaultTableModel(new String[]{"No", "ID", "Position Name"}, 0) {
-            @Override
-            public boolean isCellEditable(int row, int column) {
-                return false; 
+        JPanel topPanel = new JPanel(new BorderLayout(10, 10));
+        topPanel.add(formPanel, BorderLayout.NORTH);
+        topPanel.add(buttonPanel, BorderLayout.CENTER);
+        topPanel.add(searchPanel, BorderLayout.SOUTH);
+
+        add(topPanel, BorderLayout.NORTH);
+
+        //  TABLE 
+        tableModel = new DefaultTableModel(
+                new String[]{"No", "ID", "Nama Jabatan"}, 0
+        ) {
+            public boolean isCellEditable(int r, int c) {
+                return false;
             }
         };
-        
+
         table = new JTable(tableModel);
+        table.getColumnModel().getColumn(1).setMinWidth(0);
+        table.getColumnModel().getColumn(1).setMaxWidth(0);
+        table.getColumnModel().getColumn(1).setWidth(0);
+
         JScrollPane scrollPane = new JScrollPane(table);
-        scrollPane.setBounds(20, 210, 440, 270);
-        add(scrollPane);
+        scrollPane.setBorder(
+                BorderFactory.createTitledBorder("Daftar Jabatan")
+        );
 
-        // LOGIKA & VALIDASI 
+        add(scrollPane, BorderLayout.CENTER);
 
-        // Load Data Awal (Melihat data di JTable)
+        //  LOAD DATA 
         controller.loadData(tableModel);
 
-        // Klik Baris Tabel (Persiapan Ubah/Hapus)
+        //  EVENTS 
         table.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int row = table.getSelectedRow();
-                if (row != -1) {
-                    selectedId = Integer.parseInt(table.getValueAt(row, 1).toString());
-                    txtName.setText(table.getValueAt(row, 2).toString());
-                    
-                    btnSave.setEnabled(false);
-                    btnUpdate.setEnabled(true);
-                    btnDelete.setEnabled(true);
-                }
+                if (row == -1) return;
+
+                selectedId = Integer.parseInt(
+                        tableModel.getValueAt(row, 1).toString()
+                );
+                txtName.setText(
+                        tableModel.getValueAt(row, 2).toString()
+                );
+
+                btnSave.setEnabled(false);
+                btnUpdate.setEnabled(true);
+                btnDelete.setEnabled(true);
             }
         });
 
-        // Event: Save (Tambah Data & Validasi)
         btnSave.addActionListener(e -> {
             String name = txtName.getText().trim();
-            if (name.isEmpty()) { 
-                JOptionPane.showMessageDialog(this, "Validasi: Nama posisi tidak boleh kosong!");
-            } else {
-                controller.insert(name, tableModel);
-                resetForm();
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Nama jabatan tidak boleh kosong!"
+                );
+                return;
             }
+
+            controller.insert(name, tableModel);
+            resetForm();
         });
 
-        // Event: Update 
         btnUpdate.addActionListener(e -> {
             String name = txtName.getText().trim();
-            if (name.isEmpty()) { 
-                JOptionPane.showMessageDialog(this, "Validasi: Nama posisi baru harus diisi!");
-            } else {
-                controller.update(selectedId, name, tableModel);
-                resetForm();
+            if (name.isEmpty()) {
+                JOptionPane.showMessageDialog(
+                        this,
+                        "Nama jabatan baru harus diisi!"
+                );
+                return;
             }
+
+            controller.update(selectedId, name, tableModel);
+            resetForm();
         });
 
-        // Event: Delete 
         btnDelete.addActionListener(e -> {
-            int confirm = JOptionPane.showConfirmDialog(this, "Hapus data ini?", "Konfirmasi", JOptionPane.YES_NO_OPTION);
+            int confirm = JOptionPane.showConfirmDialog(
+                    this,
+                    "Hapus data ini?",
+                    "Konfirmasi",
+                    JOptionPane.YES_NO_OPTION
+            );
+
             if (confirm == JOptionPane.YES_OPTION) {
                 controller.delete(selectedId, tableModel);
                 resetForm();
             }
         });
 
-        // Event: Search (Mencari data)
         txtSearch.addKeyListener(new java.awt.event.KeyAdapter() {
             @Override
             public void keyReleased(java.awt.event.KeyEvent evt) {
@@ -137,7 +169,6 @@ public class PositionView extends JFrame {
             }
         });
 
-        // Event: Clear
         btnClear.addActionListener(e -> resetForm());
     }
 
@@ -145,9 +176,11 @@ public class PositionView extends JFrame {
         txtName.setText("");
         txtSearch.setText("");
         selectedId = -1;
+
         btnSave.setEnabled(true);
         btnUpdate.setEnabled(false);
         btnDelete.setEnabled(false);
+
         table.clearSelection();
         controller.loadData(tableModel);
     }
