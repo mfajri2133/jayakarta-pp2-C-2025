@@ -188,20 +188,4 @@ public class ProductView extends JFrame {
         table.clearSelection();
         controller.loadData(tableModel);
     }
-    
-    private void resetForm() {
-        txtName.setText("");
-        txtPrice.setText("");
-        txtStock.setText("");
-        txtSearch.setText("");
-        selectedId = -1;
-
-        btnSave.setEnabled(true);
-        btnUpdate.setEnabled(false);
-        btnDelete.setEnabled(false);
-
-        table.clearSelection();
-        controller.loadData(tableModel);
-    }
-}
 }
