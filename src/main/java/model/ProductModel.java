@@ -8,25 +8,41 @@ import java.sql.Statement;
 
 public class ProductModel {
 
-    // Ambil semua data produk
+    // ================= GET ALL (JOIN CATEGORY) =================
     public ResultSet getAll() throws Exception {
-        String sql = "SELECT * FROM products";
+        String sql = """
+            SELECT 
+                p.id,
+                p.name AS product_name,
+                c.name AS category_name,
+                p.price,
+                p.stock
+            FROM products p
+            JOIN categories c ON p.category_id = c.id
+        """;
+
         Statement st = DBConnection.getConnection().createStatement();
         return st.executeQuery(sql);
     }
 
-    // Cek apakah nama produk sudah ada
-    public boolean exists(String name) throws Exception {
-        String sql = "SELECT id FROM products WHERE name = ?";
-        PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
-        ps.setString(1, name);
-        ResultSet rs = ps.executeQuery();
-        return rs.next();
+    public ResultSet getAvailableProducts() throws Exception {
+        String sql = """
+        SELECT id, name, price, stock
+        FROM products
+        WHERE stock > 0
+    """;
+        return DBConnection.getConnection()
+                .prepareStatement(sql)
+                .executeQuery();
     }
 
-    // Insert
+    // ================= INSERT =================
     public void insert(String name, int categoryId, double price, int stock) throws Exception {
-        String sql = "INSERT INTO products (name, category_id, price, stock) VALUES (?, ?, ?, ?)";
+        String sql = """
+            INSERT INTO products (name, category_id, price, stock)
+            VALUES (?, ?, ?, ?)
+        """;
+
         PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
         ps.setString(1, name);
         ps.setInt(2, categoryId);
@@ -35,9 +51,14 @@ public class ProductModel {
         ps.executeUpdate();
     }
 
-    // Update
+    // ================= UPDATE =================
     public void update(int id, String name, int categoryId, double price, int stock) throws Exception {
-        String sql = "UPDATE products SET name = ?, category_id = ?, price = ?, stock = ? WHERE id = ?";
+        String sql = """
+            UPDATE products
+            SET name = ?, category_id = ?, price = ?, stock = ?
+            WHERE id = ?
+        """;
+
         PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
         ps.setString(1, name);
         ps.setInt(2, categoryId);
@@ -47,7 +68,7 @@ public class ProductModel {
         ps.executeUpdate();
     }
 
-    // Delete
+    // ================= DELETE =================
     public void delete(int id) throws Exception {
         String sql = "DELETE FROM products WHERE id = ?";
         PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
@@ -55,20 +76,35 @@ public class ProductModel {
         ps.executeUpdate();
     }
 
-    // Search
+    // ================= SEARCH =================
     public ResultSet search(String keyword) throws Exception {
-        String sql = "SELECT * FROM products WHERE name LIKE ?";
+        String sql = """
+            SELECT 
+                p.id,
+                p.name AS product_name,
+                c.name AS category_name,
+                p.price,
+                p.stock
+            FROM products p
+            JOIN categories c ON p.category_id = c.id
+            WHERE p.name LIKE ?
+        """;
+
         PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
         ps.setString(1, "%" + keyword + "%");
         return ps.executeQuery();
     }
-}
 
-//    // Opsi Tambahan: Ambil data produk + Nama Kategorinya (berguna untuk tampilan tabel)
-//    public ResultSet getAllWithCategory() throws Exception {
-//        String sql = "SELECT p.id, p.name, c.name AS category_name, p.price, p.stock " +
-//                     "FROM products p " +
-//                     "JOIN categories c ON p.category_id = c.id";
-//        Statement st = DBConnection.getConnection().createStatement();
-//        return st.executeQuery(sql);
-//    }
+    // ================= GET CATEGORY ID BY NAME =================
+    public int getCategoryIdByName(String categoryName) throws Exception {
+        String sql = "SELECT id FROM categories WHERE name = ?";
+        PreparedStatement ps = DBConnection.getConnection().prepareStatement(sql);
+        ps.setString(1, categoryName);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("id");
+        }
+        throw new Exception("Kategori tidak ditemukan");
+    }
+}
