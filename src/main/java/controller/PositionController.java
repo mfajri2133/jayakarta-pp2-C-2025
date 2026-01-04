@@ -30,17 +30,17 @@ public class PositionController {
     public void insert(String name, DefaultTableModel table) {
         try {
             if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Position name must be filled");
+                JOptionPane.showMessageDialog(null, "Nama jabatan harus diisi");
                 return;
             }
 
             if (model.exists(name)) {
-                JOptionPane.showMessageDialog(null, "Position already exists");
+                JOptionPane.showMessageDialog(null, "Jabatan sudah ada");
                 return;
             }
 
             model.insert(name);
-            JOptionPane.showMessageDialog(null, "Position saved successfully");
+            JOptionPane.showMessageDialog(null, "Jabatan berhasil ditambahkan");
             loadData(table);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -50,12 +50,12 @@ public class PositionController {
     public void update(int id, String name, DefaultTableModel table) {
         try {
             if (name.isEmpty()) {
-                JOptionPane.showMessageDialog(null, "Position name must be filled");
+                JOptionPane.showMessageDialog(null, "Nama jabatan harus diisi");
                 return;
             }
 
             model.update(id, name);
-            JOptionPane.showMessageDialog(null, "Position updated successfully");
+            JOptionPane.showMessageDialog(null, "Jabatan berhasil diperbarui");
             loadData(table);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
@@ -65,7 +65,7 @@ public class PositionController {
     public void delete(int id, DefaultTableModel table) {
         try {
             model.delete(id);
-            JOptionPane.showMessageDialog(null, "Position deleted successfully");
+            JOptionPane.showMessageDialog(null, "Jabatan berhasil dihapus");
             loadData(table);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, e.getMessage());
